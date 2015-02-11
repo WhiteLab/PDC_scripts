@@ -6,8 +6,8 @@ Manage:
 * cinder blocks
 * torque cluster
 
-### swift_loader.py
 ==========
+### swift_loader.py
 Stage files from remote server into cinder block before uploading into swift
 
 Requires a config.json:
