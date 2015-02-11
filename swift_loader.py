@@ -47,28 +47,21 @@ class Loader():
 
   def swift_load(self, filename):
     bid = filename.split('_')[0]
-    size = os.path.getsize(filename)
-    print "%s - %s" % (filename, size)
-    if(size > self.FIVE_GB):
-      print "it's a big one, %s" % bid
-      os.system('swift upload --object-name RAW/%s/%s %s -S %s %s' %
+    os.system('swift upload --object-name RAW/%s/%s %s -S %s %s' %
           (bid, filename, self.config_data['project'], self.ONE_GB, filename))
-    else:
-      os.system('swift upload --object-name RAW/%s/%s %s %s' %
-          (bid, filename, self.config_data['project'], filename))
 
 
   def process_file(self):
     self.copy_file_from_remote(self.filename)
     self.swift_load(self.filename)
-    os.remove(self.filename)
+    #os.remove(self.filename)
       
 
 def main():
   parser = argparse.ArgumentParser(
       description='Copy files from afar, stage in cwd, and load into Swift.')
-  parser.add_argument('-l', '--list', action='store', dest='file_list',
-      help='contains only filenames')
+  parser.add_argument('-f', '--file', action='store', dest='infile',
+      help='Filename to be loaded into swift')
   parser.add_argument('-j', '--json', action='store', dest='config_file', 
       help='.json config file, contains file locations and access credential details')
   if len(sys.argv) == 1:
@@ -76,7 +69,7 @@ def main():
     sys.exit(1)
   args = parser.parse_args()
 
-  loader = Loader(args.config_file, args.file_list)
+  loader = Loader(args.config_file, args.infile)
 
 
 if __name__ == '__main__':
