@@ -21,8 +21,10 @@ Requires a config.json:
 ```
 Usage:
 `python swift_loader.py -j config.json -f <FILE>`
-* Downloads `FILE` from `remote-user@remote-ip:remote-dir`
-* load `FILE` into the `project` swift container in 1GB chunks
-* deletes `FILE` from staging area
+* Downloads `FILE` from `remote-user@remote-ip:remote-dir`.
+* Load `FILE` into the `project` swift container in 1GB chunks.
+* Deletes `FILE` from staging area.
+
+TODO: Error checking, exception handling
 
 
