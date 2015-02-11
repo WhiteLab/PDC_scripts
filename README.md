@@ -20,7 +20,8 @@ Requires a config.json:
 }
 ```
 Usage:
-`python swift_loader.py -j config.json -f <FILE>`
+`cat filename_list.txt | \
+xargs -P <threads> -n 1 -IFILE python swift_loader.py -j config.json -f FILE`
 * Downloads `FILE` from `remote-user@remote-ip:remote-dir`.
 * Load `FILE` into the `project` swift container in 1GB chunks.
 * Deletes `FILE` from staging area.
