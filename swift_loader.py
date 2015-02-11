@@ -37,13 +37,15 @@ class Loader():
 
   def copy_file_from_remote(self, filename):
     try:
-      os.system('scp "%s@%s:%s/%s" .' % (self.config_data['remote-user'],
-                                         self.config_data['remote-ip'], 
-                                         self.config_data['remote-dir'],
-                                         filename))
+      os.system('scp -o ForwardAgent=yes "%s@%s:%s/%s" .' % 
+          (self.config_data['remote-user'],
+           self.config_data['remote-ip'], 
+           self.config_data['remote-dir'],
+           filename))
     except Exception as e:
       print >>sys.stderr, "ERROR: copy_file_from_remote"
       raise
+      sys.exit(1)
 
   def swift_load(self, filename):
     bid = filename.split('_')[0]
@@ -54,7 +56,7 @@ class Loader():
   def process_file(self):
     self.copy_file_from_remote(self.filename)
     self.swift_load(self.filename)
-    #os.remove(self.filename)
+    os.remove(self.filename)
       
 
 def main():
