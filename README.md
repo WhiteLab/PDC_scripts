@@ -5,3 +5,6 @@ Manage:
 * instances
 * cinder blocks
 * torque cluster
+
+Stage files from remote server into cinder block before uploading into swift
+
