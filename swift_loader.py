@@ -47,10 +47,13 @@ class Loader():
       raise
       sys.exit(1)
 
+
   def swift_load(self, filename):
     bid = filename.split('_')[0]
-    os.system('swift upload --object-name RAW/%s/%s %s -S %s %s' %
-          (bid, filename, self.config_data['project'], self.ONE_GB, filename))
+    os.system('swift upload --skip-identical --object-name ' + \
+        '%s/%s/%s %s -S %s %s' %(self.config_data['subdirectory'],
+          bid, filename, self.config_data['project'], 
+          self.ONE_GB, filename))
 
 
   def process_file(self):
