@@ -1,6 +1,7 @@
 import argparse
 import json
 import os
+import logging
 import subprocess
 import sys
 '''
@@ -32,9 +33,38 @@ class Loader():
   def __init__(self, json_config):
     self.json_config = json_config
     self.parse_config()
+
+    # relocate our operations to the cinder volume
+    os.chdir(self.config_data['local-dir'])
+
+    logfile = 'transfer_logs/' + self.config_data['project'] + ".log"
+    logging.basicConfig(filename=logfile, level=logging.DEBUG, 
+        format='%(asctime)s %(levelname)s: %(message)s', 
+        datefmt='[%Y-%m-%d %H:%M:%S %p]')
+
+    self.check_environment()
+
     self.get_swift_filelist()
     self.get_remote_filelist()
+
+    if len(self.remote_files) < 1:
+      logging.info("No new files to transfer, exiting")
+      sys.exit(0)
+
+    logging.info("Preparing to transfer %i new files" % len(self.remote_files))
     [self.process_file(f) for f in self.remote_files]
+    logging.info("Complete")
+
+
+  def check_environment(self):
+    if not os.environ.get('OS_TENANT_NAME'):
+      logging.critical("OS_TENNANT_NAME not set, forgot to load " + \
+          "~/.novarc?  Exiting")
+      sys.exit(1)
+    if os.environ.get('http_proxy') or os.environ.get('HTTP_proxy'):
+      logging.critical("http_proxy environmental variables need to be " + \
+          "unset.  Exiting")
+      sys.exit(1)
 
 
   def process_file(self, filename):
@@ -48,7 +78,7 @@ class Loader():
 
 
   def get_swift_filelist(self):
-    print "Gathering swift files"
+    logging.info("Gathering swift files")
     self.swift_files = list()
     p = subprocess.Popen(['swift', 'list', 
           self.config_data['project'], '--prefix', 
@@ -58,7 +88,7 @@ class Loader():
 
 
   def get_remote_filelist(self):
-    print "Gathering new remote files"
+    logging.info("Gathering new remote files")
     self.remote_files = list()
     remote_acct = "%s@%s" % (self.config_data['remote-user'],
         self.config_data['remote-ip'])
@@ -68,26 +98,27 @@ class Loader():
     for line in p.stdout.read().splitlines():
       remote_filename = line.split('/')[-1]
       if remote_filename not in self.swift_files:
-        print "transfer remote_filename: " + remote_filename
+        logging.info("transfer remote_filename: " + remote_filename)
         self.remote_files.append(remote_filename)
+  
 
   
   def copy_file_from_remote(self, filename):
     try:
-      print "copying remote file: " + filename
+      logging.info("Copying remote file: " + filename)
       os.system('scp -o ForwardAgent=yes "%s@%s:%s/%s" .' % 
           (self.config_data['remote-user'],
            self.config_data['remote-ip'], 
            self.config_data['remote-dir'],
            filename))
     except Exception as e:
-      print >>sys.stderr, "ERROR: copy_file_from_remote"
+      logging.critical("[Copy_file_from_remote]")
       raise
       sys.exit(1)
 
 
   def swift_load(self, filename):
-    print "loading to swift: " + filename
+    logging.info("loading to swift: " + filename)
     bid = filename.split('_')[0]
     os.system('swift upload --skip-identical --use-slo --object-name ' + \
         '%s/%s/%s %s -S %s %s' %(self.config_data['subdirectory'],
