@@ -12,7 +12,8 @@ Requires a config.json:
 	"remote-ip" : "192.170.228.3",
 	"remote-user" : "JGRUNDSTAD",
 	"remote-dir" : "/glusterfs/netapp/homes1/whitelab-pancreatic/sequences/PANCAN",
-	"project" : "PANCAN"
+	"project" : "PANCAN",
+	"subdirectory" : "RAW"
 }
 ```
 Usage:
