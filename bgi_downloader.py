@@ -31,8 +31,8 @@ def list_project_files(project):
   file_dict = dict()
   for line in files_output.split('\n'):
     if '-' in line:
+      print line
       toks = line.split('\t')
-      print "file_id: %s\tfile_name: %s" % (toks[0], toks[2])
       file_dict[toks[0]] = toks[2]
   return file_dict
 
@@ -54,6 +54,10 @@ def process_download_links(file_dict):
       print "Skipping: %s" % filename
 
 
+def set_environmentals():
+  os.environ["PYTHONIOENCODING"] = "UTF-8"
+  os.environ["BGIONLINE_SERVER_HOST"] = "beta.bgionline.com"
+
 def main():
   parser = argparse.ArgumentParser(description='Download project data ' + \
       'from BGI-online')
@@ -66,9 +70,7 @@ def main():
     sys.exit(1)
 
   args = parser.parse_args()
-  os.environ["PYTHONIOENCODING"] = "UTF-8"
-  os.environ["BGIONLINE_SERVER_HOST"] = "beta.bgionline.com"
-
+  set_environmentals()
   (USER, PASSWD) = parse_creds(args.credentials_file)
   
   login(USER, PASSWD)

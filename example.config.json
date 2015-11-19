@@ -2,6 +2,7 @@
 	"remote-ip" : "192.170.228.3",
 	"remote-user" : "JGRUNDSTAD",
 	"remote-dir" : "/glusterfs/netapp/homes1/whitelab-pancreatic/sequences/PANCAN",
+  "local-dir" : "/some/local/dir/for/staging",
 	"project" : "PANCAN",
 	"subdirectory" : "RAW"
 }
