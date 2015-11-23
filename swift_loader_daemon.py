@@ -58,7 +58,7 @@ class Loader():
 
   def check_environment(self):
     if not os.environ.get('OS_TENANT_NAME'):
-      logging.critical("OS_TENNANT_NAME not set, forgot to load " + \
+      logging.critical("OS_TENANT_NAME not set, forgot to load " + \
           "~/.novarc?  Exiting")
       sys.exit(1)
     if os.environ.get('http_proxy') or os.environ.get('HTTP_proxy'):
@@ -120,7 +120,7 @@ class Loader():
   def swift_load(self, filename):
     logging.info("loading to swift: " + filename)
     bid = filename.split('_')[0]
-    os.system('swift upload --skip-identical --use-slo --object-name ' + \
+    os.system('swift upload --skip-identical --object-name ' + \
         '%s/%s/%s %s -S %s %s' %(self.config_data['subdirectory'],
           bid, filename, self.config_data['project'], 
           self.ONE_GB, filename))
@@ -136,6 +136,8 @@ def main():
     sys.exit(1)
   args = parser.parse_args()
 
+  subprocess.call('. ~/.novarc', shell=True)
+  
   loader = Loader(args.config_file)
 
 
