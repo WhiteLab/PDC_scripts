@@ -34,6 +34,7 @@ class Loader():
     self.json_config = json_config
     self.parse_config()
 
+    self.source_novarc()
     # relocate our operations to the cinder volume
     os.chdir(self.config_data['local-dir'])
 
@@ -56,10 +57,18 @@ class Loader():
     logging.info("Complete")
 
 
+  def source_novarc(self):
+    with open('/home/ubuntu/.novarc', 'r') as f:
+      for line in f:
+        k,v = line.rstrip().split('=')
+        os.environ[k] = v
+
+
   def check_environment(self):
     if not os.environ.get('OS_TENANT_NAME'):
       logging.critical("OS_TENANT_NAME not set, forgot to load " + \
           "~/.novarc?  Exiting")
+      #self.source_novarc()
       sys.exit(1)
     if os.environ.get('http_proxy') or os.environ.get('HTTP_proxy'):
       logging.critical("http_proxy environmental variables need to be " + \
@@ -136,7 +145,7 @@ def main():
     sys.exit(1)
   args = parser.parse_args()
 
-  subprocess.call('. ~/.novarc', shell=True)
+  subprocess.call('. /home/ubuntu/.novarc', shell=True)
   
   loader = Loader(args.config_file)
 
