@@ -58,9 +58,10 @@ class Loader():
 
 
   def source_novarc(self):
-    with open('/home/ubuntu/.novarc', 'r') as f:
+    with open('/home/ubuntu/.novarc-mbrown', 'r') as f:
       for line in f:
         k,v = line.rstrip().split('=')
+        k = k.replace('export ','')
         os.environ[k] = v
 
 
@@ -89,9 +90,12 @@ class Loader():
   def get_swift_filelist(self):
     logging.info("Gathering swift files")
     self.swift_files = list()
+    logging.info(['swift', 'list',
+                  self.config_data['project'], '--prefix',
+                  self.config_data['subdirectory']])
     p = subprocess.Popen(['swift', 'list', 
-          self.config_data['project'], '--prefix', 
-          self.config_data['subdirectory']], stdout=subprocess.PIPE)
+                          self.config_data['project'], '--prefix', 
+                          self.config_data['subdirectory']], stdout=subprocess.PIPE)
     for line in p.stdout.read().splitlines():
       self.swift_files.append(line.split('/')[-1])
 
@@ -100,8 +104,9 @@ class Loader():
     logging.info("Gathering new remote files")
     self.remote_files = list()
     remote_acct = "%s@%s" % (self.config_data['remote-user'],
-        self.config_data['remote-ip'])
+                             self.config_data['remote-ip'])
     remote_find_cmd = 'find %s -iname "*.gz"' % self.config_data['remote-dir']
+    logging.info(['ssh', remote_acct, remote_find_cmd])
     p = subprocess.Popen(['ssh', remote_acct, remote_find_cmd], 
         stdout=subprocess.PIPE)
     for line in p.stdout.read().splitlines():
