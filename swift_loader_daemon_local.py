@@ -39,6 +39,7 @@ class Loader():
         self.parse_config()
         self.source_novarc()
         self.swift_files = list()
+        self.remote_files = list()
         # relocate our operations to the cinder volume
         os.chdir(self.config_data['local-dir'])
 
