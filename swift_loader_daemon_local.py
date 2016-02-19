@@ -109,7 +109,7 @@ class Loader():
             logging("Directory for " + self.config_data['remote-dir'] + " not found! Peacing out!")
             exit(1)
         for line in p.splitlines():
-            remote_filename = line.split('/')[-1]
+            remote_filename = line
             if remote_filename not in self.swift_files:
                 logging.info("transfer remote_filename: " + remote_filename)
                 self.remote_files.append(remote_filename)
