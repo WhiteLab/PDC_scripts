@@ -5,6 +5,7 @@ import logging
 import os
 import subprocess
 import sys
+import pdb
 
 '''
 Deamon version of swift loader.
@@ -64,7 +65,7 @@ class Loader():
             for line in f:
                 k, v = line.rstrip().split('=')
                 k = k.replace('export ', '')
-                k = k.replace('"', '')
+                v = v.replace('"', '')
                 os.environ[k] = v
 
     def check_environment(self):
@@ -90,6 +91,7 @@ class Loader():
         logging.info(['swift', 'list',
                       self.config_data['project'], '--prefix',
                       self.config_data['subdirectory']])
+	# pdb.set_trace()
         p = subprocess.Popen(['swift', 'list',
                               self.config_data['project'], '--prefix',
                               self.config_data['subdirectory']], stdout=subprocess.PIPE)
