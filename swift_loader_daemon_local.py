@@ -116,8 +116,8 @@ class Loader():
 
     def swift_load(self, filename):
         logging.info("loading to swift: " + filename)
-        bid = filename.split('_')[0]
         file_basename = os.path.basename(filename)
+        bid = file_basename.split('_')[0]
         pdb.set_trace()
         os.system('swift upload --skip-identical --object-name ' + \
                   '%s/%s/%s %s -S %s %s' % (self.config_data['subdirectory'],
