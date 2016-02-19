@@ -35,7 +35,7 @@ class Loader():
 
     def __init__(self, json_config, novarc):
         self.json_config = json_config
-        self.source_novarc = novarc
+        self.novarc = novarc
         self.parse_config()
 
         self.source_novarc()
