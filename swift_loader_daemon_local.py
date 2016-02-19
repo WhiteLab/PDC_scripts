@@ -83,7 +83,7 @@ class Loader():
 
     def get_swift_filelist(self):
         logging.info("Gathering swift files")
-        swift_cmd = 'swift list' + self.config_data['project'] + '--prefix ' + self.config_data['subdirectory']
+        swift_cmd = 'swift list ' + self.config_data['project'] + ' --prefix ' + self.config_data['subdirectory']
         logging.info(swift_cmd)
         pdb.set_trace()
         p = subprocess.check_output(swift_cmd, shell=True)
