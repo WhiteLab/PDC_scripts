@@ -91,7 +91,6 @@ class Loader():
         logging.info(['swift', 'list',
                       self.config_data['project'], '--prefix',
                       self.config_data['subdirectory']])
-	# pdb.set_trace()
         p = subprocess.Popen(['swift', 'list',
                               self.config_data['project'], '--prefix',
                               self.config_data['subdirectory']], stdout=subprocess.PIPE)
@@ -102,9 +101,9 @@ class Loader():
         logging.info("Gathering new remote files")
         self.remote_files = list()
         cmd = 'find %s -iname "*.gz"' % self.config_data['remote-dir']
+        pdb.set_trace()
         logging.info([cmd])
-        p = subprocess.Popen([cmd],
-                             stdout=subprocess.PIPE)
+        p = subprocess.check_output(cmd)
         for line in p.stdout.read().splitlines():
             remote_filename = line.split('/')[-1]
             if remote_filename not in self.swift_files:
