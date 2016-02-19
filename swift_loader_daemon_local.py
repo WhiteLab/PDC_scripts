@@ -37,8 +37,8 @@ class Loader():
         self.json_config = json_config
         self.novarc = novarc
         self.parse_config()
-
         self.source_novarc()
+        self.swift_files = list()
         # relocate our operations to the cinder volume
         os.chdir(self.config_data['local-dir'])
 
@@ -81,19 +81,17 @@ class Loader():
 
     def get_swift_filelist(self):
         logging.info("Gathering swift files")
-        self.swift_files = list()
         logging.info(['swift', 'list',
                       self.config_data['project'], '--prefix',
                       self.config_data['subdirectory']])
-        p = subprocess.Popen(['swift', 'list',
+        p = subprocess.check_output(['swift', 'list',
                               self.config_data['project'], '--prefix',
-                              self.config_data['subdirectory']], stdout=subprocess.PIPE)
-        for line in p.stdout.read().splitlines():
+                              self.config_data['subdirectory']], shell=True)
+        for line in p.splitlines():
             self.swift_files.append(line.split('/')[-1])
 
     def get_local_filelist(self):
         logging.info("Gathering new remote files")
-        self.remote_files = list()
         cmd = 'find %s -iname *.gz' % self.config_data['remote-dir']
         logging.info([cmd])
         try:
