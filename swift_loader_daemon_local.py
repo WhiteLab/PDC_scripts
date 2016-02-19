@@ -5,6 +5,7 @@ import logging
 import os
 import subprocess
 import sys
+import pdb
 
 '''
 Deamon version of swift loader.
@@ -82,12 +83,10 @@ class Loader():
 
     def get_swift_filelist(self):
         logging.info("Gathering swift files")
-        logging.info(['swift', 'list',
-                      self.config_data['project'], '--prefix',
-                      self.config_data['subdirectory']])
-        p = subprocess.check_output(['swift', 'list',
-                              self.config_data['project'], '--prefix',
-                              self.config_data['subdirectory']], shell=True)
+        swift_cmd = 'swift list' + self.config_data['project'] + '--prefix ' + self.config_data['subdirectory']
+        logging.info(swift_cmd)
+        pdb.set_trace()
+        p = subprocess.check_output(swift_cmd, shell=True)
         for line in p.splitlines():
             self.swift_files.append(line.split('/')[-1])
 
@@ -98,14 +97,13 @@ class Loader():
         try:
             p = subprocess.check_output(cmd, shell=True)
         except:
-            logging("Directory for " + self.config_data['remote-dir'] + " not found! Peacing out!")
+            logging.info("Directory for " + self.config_data['remote-dir'] + " not found! Peacing out!")
             exit(1)
         for line in p.splitlines():
             remote_filename = os.path.basename(line)
             if remote_filename not in self.swift_files:
                 logging.info("transfer remote_filename: " + line)
                 self.remote_files.append(line)
-
 
     def swift_load(self, filename):
         logging.info("loading to swift: " + filename)
