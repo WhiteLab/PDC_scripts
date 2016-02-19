@@ -48,7 +48,6 @@ class Loader():
                             datefmt='[%Y-%m-%d %H:%M:%S %p]')
 
         self.check_environment()
-
         self.get_swift_filelist()
         self.get_local_filelist()
 
@@ -65,6 +64,7 @@ class Loader():
             for line in f:
                 k, v = line.rstrip().split('=')
                 k = k.replace('export ', '')
+                k = k.replace('"', '')
                 os.environ[k] = v
 
     def check_environment(self):
