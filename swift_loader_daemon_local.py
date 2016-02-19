@@ -72,11 +72,6 @@ class Loader():
             logging.critical("OS_TENANT_NAME not set, forgot to load " + \
                              "~/.novarc?  Trying again")
             self.source_novarc()
-            #sys.exit(1)
-        # if os.environ.get('http_proxy') or os.environ.get('HTTP_proxy'):
-        #     logging.critical("http_proxy environmental variables need to be " + \
-        #                      "unset.  Exiting")
-        #     sys.exit(1)
 
     def process_file(self, filename):
         self.swift_load(filename)
