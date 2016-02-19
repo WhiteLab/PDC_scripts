@@ -87,8 +87,6 @@ class Loader():
         logging.info(swift_cmd)
         p = subprocess.check_output(swift_cmd, shell=True)
         for line in p.splitlines():
-            pdb.set_trace()
-
             self.swift_files.append(line.split('/')[-1])
 
     def get_local_filelist(self):
