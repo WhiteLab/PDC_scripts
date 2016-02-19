@@ -5,7 +5,6 @@ import logging
 import os
 import subprocess
 import sys
-import pdb
 
 '''
 Deamon version of swift loader.
@@ -118,7 +117,6 @@ class Loader():
         logging.info("loading to swift: " + filename)
         file_basename = os.path.basename(filename)
         bid = file_basename.split('_')[0]
-        pdb.set_trace()
         os.system('swift upload --skip-identical --object-name ' + \
                   '%s/%s/%s %s -S %s %s' % (self.config_data['subdirectory'],
                                             bid, file_basename, self.config_data['project'],
