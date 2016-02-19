@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import argparse
 import json
 import logging
@@ -60,7 +61,7 @@ class Loader():
         logging.info("Complete")
 
     def source_novarc(self):
-        with open('/home/ubuntu/.novarc-mbrown', 'r') as f:
+        with open(self.novarc, 'r') as f:
             for line in f:
                 k, v = line.rstrip().split('=')
                 k = k.replace('export ', '')
@@ -70,7 +71,7 @@ class Loader():
         if not os.environ.get('OS_TENANT_NAME'):
             logging.critical("OS_TENANT_NAME not set, forgot to load " + \
                              "~/.novarc?  Trying again")
-            self.source_novarc(self.novarc)
+            self.source_novarc()
             #sys.exit(1)
         # if os.environ.get('http_proxy') or os.environ.get('HTTP_proxy'):
         #     logging.critical("http_proxy environmental variables need to be " + \
