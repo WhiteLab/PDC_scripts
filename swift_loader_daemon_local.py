@@ -1,9 +1,10 @@
 import argparse
 import json
-import os
 import logging
+import os
 import subprocess
 import sys
+
 '''
 Deamon version of swift loader.
 
@@ -22,139 +23,118 @@ typical swift call:
 for larger files, do in 1G segments:
   swift upload --object-name RAW/2015-1235/2015-1235_sequence.txt.gz \
       PANCAN -S 1073741824 2015-1235_sequence.txt.gz
+modified version of J Grunstad's to run locally.  copy not required
 
 '''
 
+
 class Loader():
+    ONE_GB = 1073741824
+    FIVE_GB = 5368709120
 
-  ONE_GB = 1073741824
-  FIVE_GB = 5368709120
+    def __init__(self, json_config, novarc):
+        self.json_config = json_config
+        self.source_novarc = novarc
+        self.parse_config()
 
-  def __init__(self, json_config):
-    self.json_config = json_config
-    self.parse_config()
+        self.source_novarc()
+        # relocate our operations to the cinder volume
+        os.chdir(self.config_data['local-dir'])
 
-    self.source_novarc()
-    # relocate our operations to the cinder volume
-    os.chdir(self.config_data['local-dir'])
+        logfile = 'transfer_logs/' + self.config_data['project'] + ".log"
+        logging.basicConfig(filename=logfile, level=logging.DEBUG,
+                            format='%(asctime)s %(levelname)s: %(message)s',
+                            datefmt='[%Y-%m-%d %H:%M:%S %p]')
 
-    logfile = 'transfer_logs/' + self.config_data['project'] + ".log"
-    logging.basicConfig(filename=logfile, level=logging.DEBUG, 
-        format='%(asctime)s %(levelname)s: %(message)s', 
-        datefmt='[%Y-%m-%d %H:%M:%S %p]')
+        self.check_environment()
 
-    self.check_environment()
+        self.get_swift_filelist()
+        self.get_local_filelist()
 
-    self.get_swift_filelist()
-    self.get_remote_filelist()
+        if len(self.remote_files) < 1:
+            logging.info("No new files to transfer, exiting")
+            sys.exit(0)
 
-    if len(self.remote_files) < 1:
-      logging.info("No new files to transfer, exiting")
-      sys.exit(0)
+        logging.info("Preparing to transfer %i new files" % len(self.remote_files))
+        [self.process_file(f) for f in self.remote_files]
+        logging.info("Complete")
 
-    logging.info("Preparing to transfer %i new files" % len(self.remote_files))
-    [self.process_file(f) for f in self.remote_files]
-    logging.info("Complete")
+    def source_novarc(self):
+        with open('/home/ubuntu/.novarc-mbrown', 'r') as f:
+            for line in f:
+                k, v = line.rstrip().split('=')
+                k = k.replace('export ', '')
+                os.environ[k] = v
 
+    def check_environment(self):
+        if not os.environ.get('OS_TENANT_NAME'):
+            logging.critical("OS_TENANT_NAME not set, forgot to load " + \
+                             "~/.novarc?  Trying again")
+            self.source_novarc(self.novarc)
+            #sys.exit(1)
+        # if os.environ.get('http_proxy') or os.environ.get('HTTP_proxy'):
+        #     logging.critical("http_proxy environmental variables need to be " + \
+        #                      "unset.  Exiting")
+        #     sys.exit(1)
 
-  def source_novarc(self):
-    with open('/home/ubuntu/.novarc-mbrown', 'r') as f:
-      for line in f:
-        k,v = line.rstrip().split('=')
-        k = k.replace('export ','')
-        os.environ[k] = v
+    def process_file(self, filename):
+        self.swift_load(filename)
 
+    def parse_config(self):
+        self.config_data = json.loads(open(self.json_config, 'r').read())
 
-  def check_environment(self):
-    if not os.environ.get('OS_TENANT_NAME'):
-      logging.critical("OS_TENANT_NAME not set, forgot to load " + \
-          "~/.novarc?  Exiting")
-      #self.source_novarc()
-      sys.exit(1)
-    if os.environ.get('http_proxy') or os.environ.get('HTTP_proxy'):
-      logging.critical("http_proxy environmental variables need to be " + \
-          "unset.  Exiting")
-      sys.exit(1)
+    def get_swift_filelist(self):
+        logging.info("Gathering swift files")
+        self.swift_files = list()
+        logging.info(['swift', 'list',
+                      self.config_data['project'], '--prefix',
+                      self.config_data['subdirectory']])
+        p = subprocess.Popen(['swift', 'list',
+                              self.config_data['project'], '--prefix',
+                              self.config_data['subdirectory']], stdout=subprocess.PIPE)
+        for line in p.stdout.read().splitlines():
+            self.swift_files.append(line.split('/')[-1])
 
-
-  def process_file(self, filename):
-    self.copy_file_from_remote(filename)
-    self.swift_load(filename)
-    os.remove(filename)
-
-
-  def parse_config(self):
-    self.config_data = json.loads(open(self.json_config, 'r').read())
-
-
-  def get_swift_filelist(self):
-    logging.info("Gathering swift files")
-    self.swift_files = list()
-    logging.info(['swift', 'list',
-                  self.config_data['project'], '--prefix',
-                  self.config_data['subdirectory']])
-    p = subprocess.Popen(['swift', 'list', 
-                          self.config_data['project'], '--prefix', 
-                          self.config_data['subdirectory']], stdout=subprocess.PIPE)
-    for line in p.stdout.read().splitlines():
-      self.swift_files.append(line.split('/')[-1])
-
-
-  def get_remote_filelist(self):
-    logging.info("Gathering new remote files")
-    self.remote_files = list()
-    remote_acct = "%s@%s" % (self.config_data['remote-user'],
-                             self.config_data['remote-ip'])
-    remote_find_cmd = 'find %s -iname "*.gz"' % self.config_data['remote-dir']
-    logging.info(['ssh', remote_acct, remote_find_cmd])
-    p = subprocess.Popen(['ssh', remote_acct, remote_find_cmd], 
-        stdout=subprocess.PIPE)
-    for line in p.stdout.read().splitlines():
-      remote_filename = line.split('/')[-1]
-      if remote_filename not in self.swift_files:
-        logging.info("transfer remote_filename: " + remote_filename)
-        self.remote_files.append(remote_filename)
-  
-
-  
-  def copy_file_from_remote(self, filename):
-    try:
-      logging.info("Copying remote file: " + filename)
-      os.system('scp -o ForwardAgent=yes "%s@%s:%s/%s" .' % 
-          (self.config_data['remote-user'],
-           self.config_data['remote-ip'], 
-           self.config_data['remote-dir'],
-           filename))
-    except Exception as e:
-      logging.critical("[Copy_file_from_remote]")
-      raise
-      sys.exit(1)
+    def get_local_filelist(self):
+        logging.info("Gathering new remote files")
+        self.remote_files = list()
+        cmd = 'find %s -iname "*.gz"' % self.config_data['remote-dir']
+        logging.info([cmd])
+        p = subprocess.Popen([cmd],
+                             stdout=subprocess.PIPE)
+        for line in p.stdout.read().splitlines():
+            remote_filename = line.split('/')[-1]
+            if remote_filename not in self.swift_files:
+                logging.info("transfer remote_filename: " + remote_filename)
+                self.remote_files.append(remote_filename)
 
 
-  def swift_load(self, filename):
-    logging.info("loading to swift: " + filename)
-    bid = filename.split('_')[0]
-    os.system('swift upload --skip-identical --object-name ' + \
-        '%s/%s/%s %s -S %s %s' %(self.config_data['subdirectory'],
-          bid, filename, self.config_data['project'], 
-          self.ONE_GB, filename))
-      
+    def swift_load(self, filename):
+        logging.info("loading to swift: " + filename)
+        bid = filename.split('_')[0]
+        file_basename = os.path.basename(filename)
+        os.system('swift upload --skip-identical --object-name ' + \
+                  '%s/%s/%s %s -S %s %s' % (self.config_data['subdirectory'],
+                                            bid, file_basename, self.config_data['project'],
+                                            self.ONE_GB, filename))
+
 
 def main():
-  parser = argparse.ArgumentParser(
-      description='Copy files from afar, stage in cwd, and load into Swift.')
-  parser.add_argument('-j', '--json', action='store', dest='config_file', 
-      help='.json config file, contains file locations and access credential details')
-  if len(sys.argv) == 1:
-    parser.print_help()
-    sys.exit(1)
-  args = parser.parse_args()
+    parser = argparse.ArgumentParser(
+        description='Copy files from afar, stage in cwd, and load into Swift.')
+    parser.add_argument('-j', '--json', action='store', dest='config_file',
+                        help='.json config file, contains file locations and access credential details')
+    parser.add_argument('-n', '--nova', action='store', dest='novarc', help='.novarc file with swift openstack auth')
 
-  subprocess.call('. /home/ubuntu/.novarc', shell=True)
-  
-  loader = Loader(args.config_file)
+    if len(sys.argv) == 1:
+        parser.print_help()
+        sys.exit(1)
+    args = parser.parse_args()
+
+    subprocess.call('. ' + args.novarc, shell=True)
+
+    loader = Loader(args.config_file, args.novarc)
 
 
 if __name__ == '__main__':
-  main()
-
+    main()
