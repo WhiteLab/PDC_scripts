@@ -101,7 +101,6 @@ class Loader():
         logging.info("Gathering new remote files")
         self.remote_files = list()
         cmd = 'find %s -iname *.gz' % self.config_data['remote-dir']
-        pdb.set_trace()
         logging.info([cmd])
         try:
             p = subprocess.check_output(cmd, shell=True)
@@ -119,6 +118,7 @@ class Loader():
         logging.info("loading to swift: " + filename)
         bid = filename.split('_')[0]
         file_basename = os.path.basename(filename)
+        pdb.set_trace()
         os.system('swift upload --skip-identical --object-name ' + \
                   '%s/%s/%s %s -S %s %s' % (self.config_data['subdirectory'],
                                             bid, file_basename, self.config_data['project'],
