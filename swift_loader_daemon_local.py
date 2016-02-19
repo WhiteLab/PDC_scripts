@@ -42,7 +42,7 @@ class Loader():
         # relocate our operations to the cinder volume
         os.chdir(self.config_data['local-dir'])
 
-        logfile = 'transfer_logs/' + self.config_data['project'] + ".log"
+        logfile = self.config_data['project'] + ".log"
         logging.basicConfig(filename=logfile, level=logging.DEBUG,
                             format='%(asctime)s %(levelname)s: %(message)s',
                             datefmt='[%Y-%m-%d %H:%M:%S %p]')
