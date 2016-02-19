@@ -100,11 +100,15 @@ class Loader():
     def get_local_filelist(self):
         logging.info("Gathering new remote files")
         self.remote_files = list()
-        cmd = 'find %s -iname "*.gz"' % self.config_data['remote-dir']
+        cmd = 'find %s -iname *.gz' % self.config_data['remote-dir']
         pdb.set_trace()
         logging.info([cmd])
-        p = subprocess.check_output(cmd)
-        for line in p.stdout.read().splitlines():
+        try:
+            p = subprocess.check_output(cmd, shell=True)
+        except:
+            logging("Directory for " + self.config_data['remote-dir'] + " not found! Peacing out!")
+            exit(1)
+        for line in p.splitlines():
             remote_filename = line.split('/')[-1]
             if remote_filename not in self.swift_files:
                 logging.info("transfer remote_filename: " + remote_filename)
