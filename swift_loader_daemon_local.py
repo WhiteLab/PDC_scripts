@@ -39,6 +39,7 @@ class Loader():
         self.novarc = novarc
         self.parse_config()
         self.source_novarc()
+        self.swift = '/usr/local/bin/swift'
         self.swift_files = list()
         self.remote_files = list()
         # relocate our operations to the cinder volume
@@ -72,7 +73,7 @@ class Loader():
     def check_environment(self):
         if not os.environ.get('OS_TENANT_NAME'):
             logging.critical("OS_TENANT_NAME not set, forgot to load " + \
-                             "~/.novarc?  Trying again")
+                             "~/.novarc? Trying again")
             self.source_novarc()
 
     def process_file(self, filename):
@@ -83,7 +84,7 @@ class Loader():
 
     def get_swift_filelist(self):
         logging.info("Gathering swift files")
-        swift_cmd = '/usr/local/bin/swift list ' + self.config_data['project'] + ' --prefix ' + self.config_data['subdirectory']
+        swift_cmd = self.swift + ' list ' + self.config_data['project'] + ' --prefix ' + self.config_data['subdirectory']
         logging.info(swift_cmd)
         p = subprocess.check_output(swift_cmd, shell=True)
         for line in p.splitlines():
@@ -108,7 +109,7 @@ class Loader():
         logging.info("loading to swift: " + filename)
         file_basename = os.path.basename(filename)
         bid = file_basename.split('_')[0]
-        os.system('swift upload --skip-identical --object-name ' + \
+        os.system(self.swift + ' upload --skip-identical --object-name ' + \
                   '%s/%s/%s %s -S %s %s' % (self.config_data['subdirectory'],
                                             bid, file_basename, self.config_data['project'],
                                             self.ONE_GB, filename))
