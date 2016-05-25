@@ -32,7 +32,7 @@ def get_source_list(user, server, directory, log):
         exit(1)
 
 
-def search_and_desync(sf, dest, log, user, server, directory):
+def search_and_desync(sf, dest, log, user, server, directory, new_dir_list):
     cur = dest + sf
     if not os.path.isfile(cur):
         log.write(date_time() + 'Syncing file ' + sf + '\n')
@@ -41,13 +41,14 @@ def search_and_desync(sf, dest, log, user, server, directory):
         check_dir = dest + os.path.dirname(sf)
         if not os.path.isdir(check_dir):
             os.mkdir(check_dir, mode=0o755)
+            new_dir_list.append(check_dir)
             log.write('Made dir ' + check_dir + '\n')
         rsync_cmd = 'rsync -rtv ' + user + '@' + server + ':' + directory + sf + ' ' + dest + sf
         check = subprocess.call(rsync_cmd, shell=True)
         if check == 0:
             log.write(date_time() + ' File transfer successful!\n')
             log.flush()
-            return 0
+            return new_dir_list
         else:
             log.write(date_time() + 'File transfer failed using command: ' + rsync_cmd + ' FIX IT\n')
             log.flush()
@@ -66,10 +67,14 @@ def synergize(config_file):
         log.flush()
         return 0
     else:
+        new_dir_list = []
         log.write('Searching destination for found sequencing files\n')
         for seqfile in source_list:
-            search_and_desync(seqfile, dest_dir, log, source_user, source_server, source_dir)
-
+            new_dir_list = search_and_desync(seqfile, dest_dir, log, source_user, source_server, source_dir,
+                                             new_dir_list)
+    for dirs in new_dir_list:
+        final_file_cmd = 'touch ' + dirs + '/import.me ' + dirs + '/sync.me'
+        subprocess.call(final_file_cmd)
     log.write(date_time() + 'File transfer completed!\n')
     log.close()
     return 0
