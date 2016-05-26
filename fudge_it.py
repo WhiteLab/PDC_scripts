@@ -16,8 +16,9 @@ def fudge_it(dirname, machine):
     # see if it matches this format: 2016-337_GTGAAAC_160512_D00422_0315_AHMLHHBCXX_L002_R1_001.fastq.gz
     find_cmd = 'find ' + dirname + ' -name \'*.fastq.gz\''
     flist = subprocess.check_output(find_cmd, shell=True)
+    flist = flist.rstrip('\n')
     for fn in flist.split('\n'):
-        test = re.search('(\d+[-_]\d+)_\D+_(\d+_\w+_\d+_\D+)_L00(\d)_R(\d)_\d+\.fastq\.gz', fn)
+        test = re.search('(\d{4}[-_]\d+)_\D+_(\d{6}_\w+_\d+_\D{10})_L00(\d)_R(\d)_\d+\.fastq\.gz$', fn)
         try:
             (bid, run, lane, end) = (test.group(1), test.group(2), test.group(3), test.group(4))
             sys.stderr.write('regex 1 ok for ' + fn + ' making link\n')
@@ -34,7 +35,7 @@ def fudge_it(dirname, machine):
         except:
             # 2016-1019_ATCACGA_L002_R2_001.fastq.gz
             sys.stderr.write('First format failed.  Trying second format\n')
-            test = re.search('(\d+[-_]\d+)_\w+_L00(\d)_R(\d)_\d+\.fastq\.gz', fn)
+            test = re.search('(\d+[-_]\d+)_\w+_L00(\d)_R(\d)_\d+\.fastq\.gz$', fn)
             try:
                 (bid, lane, end) = (test.group(1), test.group(2), test.group(3))
                 sys.stderr.write('regex 2 ok for ' + fn + ' making link\n')
