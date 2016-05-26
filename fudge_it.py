@@ -19,10 +19,6 @@ def fudge_it(dirname, machine):
     flist = flist.rstrip('\n')
     for fn in flist.split('\n'):
         test = re.search('(\d{4}[-_]\d+)_\D+_(\d{6}_\w+_\d+_\w{10})_L00(\d)_R(\d)_\d+\.fastq\.gz$', fn)
-        if test is None:
-            print '{} did not match'.format(fn)
-        else:
-            print '{} matched'.format(fn)
         try:
             (bid, run, lane, end) = (test.group(1), test.group(2), test.group(3), test.group(4))
             sys.stderr.write('regex 1 ok for ' + fn + ' making link\n')
