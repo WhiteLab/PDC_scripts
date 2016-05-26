@@ -29,13 +29,14 @@ def get_source_list(user, server, rsync_module, log, rsync_pw):
         return seqfiles
 
     except:
-        log.write('Getting source file list failed for ' + ' '.join((user, server, rsync_module)) + 'using command '
+        log.write('Getting source file list failed for ' + ' '.join((user, server, rsync_module)) + ' using command '
                   + rsync_cmd + '\n')
         log.flush()
         exit(1)
 
 
-def search_and_desync(seqdict, dest, log, user, server, directory, new_dir_list, module, rsync_pw):
+def search_and_desync(seqdict, dest, log, user, server, module, rsync_pw):
+    new_dir_list = []
     for sf in seqdict:
         cur = dest + sf
         if not os.path.isfile(cur):
@@ -48,7 +49,7 @@ def search_and_desync(seqdict, dest, log, user, server, directory, new_dir_list,
                 new_dir_list.append(check_dir)
                 log.write('Made dir ' + check_dir + '\n')
             rsync_cmd = 'rsync -rtvL  --password-file=' + rsync_pw + ' ' + user + '@' \
-                        + server + '::' + module + '/' + directory + sf + ' ' + dest + seqdict[sf]
+                        + server + '::' + module + '/' + sf + ' ' + dest + seqdict[sf]
             check = subprocess.call(rsync_cmd, shell=True)
             if check != 0:
                 log.write(date_time() + 'File transfer failed using command: ' + rsync_cmd + ' FIX IT\n')
