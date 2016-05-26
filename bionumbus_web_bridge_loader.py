@@ -28,7 +28,8 @@ def get_source_list(user, server, directory, log):
         return seqfiles
 
     except:
-        log.write('Getting source file list failed for' + ' '.join((user, server, directory)) + '\n')
+        log.write('Getting source file list failed for ' + ' '.join((user, server, directory)) + 'using command '
+                  + rsync_cmd + '\n')
         log.flush()
         exit(1)
 
