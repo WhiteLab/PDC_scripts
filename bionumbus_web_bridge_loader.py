@@ -45,7 +45,8 @@ def search_and_desync(seqdict, dest, log, user, server, module, rsync_pw):
             # check to see if directory exists first!
             check_dir = dest + os.path.dirname(seqdict[sf])
             if not os.path.isdir(check_dir):
-                os.mkdir(check_dir, mode=0o755)
+                mk_run_dir = 'mkdir ' + check_dir
+                subprocess.call(mk_run_dir, shell=True)
                 new_dir_list.append(check_dir)
                 log.write('Made dir ' + check_dir + '\n')
             rsync_cmd = 'rsync -rtvL  --password-file=' + rsync_pw + ' ' + user + '@' \
