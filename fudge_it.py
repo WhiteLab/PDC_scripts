@@ -17,7 +17,7 @@ def fudge_it(dirname, machine):
     find_cmd = 'find ' + dirname + ' -name \'*.fastq.gz\''
     flist = subprocess.check_output(find_cmd, shell=True)
     for fn in flist.split('\n'):
-        test = re.search('(\d+[\-_]\d+)_\D+_(\d+_\w+_\d+_\D+)_L00(\d)_R(\d)_\d+\.fastq\.gz', fn)
+        test = re.search('(\d+[-_]\d+)_\D+_(\d+_\w+_\d+_\D+)_L00(\d)_R(\d)_\d+\.fastq\.gz', fn)
         try:
             (bid, run, lane, end) = (test.group(1), test.group(2), test.group(3), test.group(4))
             sys.stderr.write('regex 1 ok for ' + fn + ' making link\n')
@@ -34,7 +34,7 @@ def fudge_it(dirname, machine):
         except:
             # 2016-1019_ATCACGA_L002_R2_001.fastq.gz
             sys.stderr.write('First format failed.  Trying second format\n')
-            test = re.search('(\d+[\-_]\d+)_\w+_L00(\d)_R(\d)_\d+\.fastq\.gz', fn)
+            test = re.search('(\d+[-_]\d+)_\w+_L00(\d)_R(\d)_\d+\.fastq\.gz', fn)
             try:
                 (bid, lane, end) = (test.group(1), test.group(2), test.group(3))
                 sys.stderr.write('regex 2 ok for ' + fn + ' making link\n')
