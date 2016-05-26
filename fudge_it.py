@@ -20,6 +20,7 @@ def fudge_it(dirname, machine):
         test = re.search('(\d+[-|_]\d+)_\D+_(\d+_\w+_\d+_\D+)_L00(\d)_R(\d)_\d+\.fastq\.gz', fn)
         try:
             (bid, run, lane, end) = (test.group(1), test.group(2), test.group(3), test.group(4))
+            bid.replace('_', '-')
             run_path = dirname + '/' + run
             if not os.path.isdir(run_path):
                 os.mkdir(run_path, 0o755)
@@ -27,6 +28,7 @@ def fudge_it(dirname, machine):
             if not os.path.isfile(symlink):
                 mklink = 'ln -s ' + fn + ' ' + symlink
                 subprocess.call(mklink, shell=True)
+                sys.stderr.write(mklink + '\n')
 
         except:
             # 2016-1019_ATCACGA_L002_R2_001.fastq.gz
@@ -34,6 +36,7 @@ def fudge_it(dirname, machine):
             test = re.search('(\d+[-|_]\d+)_\w+_L00(\d)_R(\d)_\d+\.fastq\.gz', fn)
             try:
                 (bid, lane, end) = (test.group(1), test.group(2), test.group(3))
+                bid.replace('_', '-')
                 date_str = str(date_as_int())
                 run = '_'.join((date_str, machine, '0000', 'AXXXXXXXXX'))
                 run_path = dirname + '/' + run
@@ -43,6 +46,7 @@ def fudge_it(dirname, machine):
                 if not os.path.isfile(symlink):
                     mklink = 'ln -s ' + fn + ' ' + symlink
                     subprocess.call(mklink, shell=True)
+                    sys.stderr.write(mklink + '\n')
             except:
                 sys.stderr.write('Could not reformat ' + fn + '\n')
 
