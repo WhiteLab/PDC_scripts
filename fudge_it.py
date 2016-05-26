@@ -13,14 +13,14 @@ def date_as_int():
 
 def fudge_it(dirname, machine):
     # helper function to create symbolic link with correctly named file
-    # see if it matches this format: 2016_337_GTGAAAC_160512_D00422_0315_AHMLHHBCXX_L002_R1_001.fastq.gz
+    # see if it matches this format: 2016-337_GTGAAAC_160512_D00422_0315_AHMLHHBCXX_L002_R1_001.fastq.gz
     find_cmd = 'find ' + dirname + ' -name \'*.fastq.gz\''
     flist = subprocess.check_output(find_cmd, shell=True)
     for fn in flist.split('\n'):
-        test = re.search('(\d+[-|_]\d+)_\D+_(\d+_\w+_\d+_\D+)_L00(\d)_R(\d)_\d+\.fastq\.gz', fn)
+        test = re.search('(\d+[\-_]\d+)_\D+_(\d+_\w+_\d+_\D+)_L00(\d)_R(\d)_\d+\.fastq\.gz', fn)
         try:
             (bid, run, lane, end) = (test.group(1), test.group(2), test.group(3), test.group(4))
-            bid.replace('_', '-')
+            bid = bid.replace('_', '-')
             run_path = dirname + '/' + run
             if not os.path.isdir(run_path):
                 os.mkdir(run_path, 0o755)
@@ -33,10 +33,10 @@ def fudge_it(dirname, machine):
         except:
             # 2016-1019_ATCACGA_L002_R2_001.fastq.gz
             sys.stderr.write('First format failed.  Trying second format\n')
-            test = re.search('(\d+[-|_]\d+)_\w+_L00(\d)_R(\d)_\d+\.fastq\.gz', fn)
+            test = re.search('(\d+[\-_]\d+)_\w+_L00(\d)_R(\d)_\d+\.fastq\.gz', fn)
             try:
                 (bid, lane, end) = (test.group(1), test.group(2), test.group(3))
-                bid.replace('_', '-')
+                bid = bid.replace('_', '-')
                 date_str = str(date_as_int())
                 run = '_'.join((date_str, machine, '0000', 'AXXXXXXXXX'))
                 run_path = dirname + '/' + run
