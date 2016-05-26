@@ -17,14 +17,14 @@ def fudge_it(dirname, machine):
     find_cmd = 'find ' + dirname + ' -name \'*.fastq.gz\''
     flist = subprocess.check_output(find_cmd, shell=True)
     for fn in flist.split('\n'):
-        test = re.search('(\d+-|_\d+)_\w+_(\d+_\w+_\d+_\w+)_L00(\d)_R(\d)_\d+\.fastq\.gz', fn)
+        test = re.search('(\d+-|_\d+)_\D+_(\d+_\w+_\d+_\D+)_L00(\d)_R(\d)_\d+\.fastq\.gz', fn)
         try:
             (bid, run, lane, end) = (test.group(1), test.group(2), test.group(3), test.group(4))
             if not os.path.isdir(run):
                 os.mkdir(run, 0o755)
-            symlink = run + '/' + '_'.join((bid, run, lane, end)) + '_sequence.txt.gz'
+            symlink = dirname + '/' + run + '/' + '_'.join((bid, run, lane, end)) + '_sequence.txt.gz'
             if not os.path.isfile(symlink):
-                mklink = 'ln -s fn ' + symlink
+                mklink = 'ln -s ' + fn + ' ' + symlink
                 subprocess.call(mklink, shell=True)
 
         except:
@@ -37,9 +37,9 @@ def fudge_it(dirname, machine):
                 run = '_'.join((date_str, machine, '0000', 'AXXXXXXXXX'))
                 if not os.path.isdir(run):
                     os.mkdir(run, 0o755)
-                symlink = run + '/' + '_'.join((bid, run, lane, end)) + '_sequence.txt.gz'
+                symlink = dirname + '/' + run + '/' + '_'.join((bid, run, lane, end)) + '_sequence.txt.gz'
                 if not os.path.isfile(symlink):
-                    mklink = 'ln -s fn ' + symlink
+                    mklink = 'ln -s ' + fn + ' ' + symlink
                     subprocess.call(mklink, shell=True)
             except:
                 sys.stderr.write('Could not reformat ' + fn + '\n')
