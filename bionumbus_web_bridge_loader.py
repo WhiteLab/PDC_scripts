@@ -60,7 +60,7 @@ def synergize(config_file):
     config_data = json.loads(open(config_file, 'r').read())
     (source_user, source_server, source_dir, dest_dir, log_dir, machine) = (config_data['source-user'], config_data['source-ip'],
     config_data['source-dir'], config_data['destination-dir'], config_data['log-dir'], config_data['machine'])
-    log = open(log_dir + config_file[:-5], 'a')
+    log = open(log_dir + config_file[:-5] + '.log', 'a')
     log.write(date_time() + 'Getting source file list\n')
     source_dict = get_source_list(source_user, source_server, source_dir, log)
     if len(source_dict) < 1:
