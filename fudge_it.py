@@ -20,6 +20,7 @@ def fudge_it(dirname, machine):
         test = re.search('(\d+[\-_]\d+)_\D+_(\d+_\w+_\d+_\D+)_L00(\d)_R(\d)_\d+\.fastq\.gz', fn)
         try:
             (bid, run, lane, end) = (test.group(1), test.group(2), test.group(3), test.group(4))
+            sys.stderr.write('regex 1 ok for ' + fn + ' making link\n')
             bid = bid.replace('_', '-')
             run_path = dirname + '/' + run
             if not os.path.isdir(run_path):
@@ -36,6 +37,7 @@ def fudge_it(dirname, machine):
             test = re.search('(\d+[\-_]\d+)_\w+_L00(\d)_R(\d)_\d+\.fastq\.gz', fn)
             try:
                 (bid, lane, end) = (test.group(1), test.group(2), test.group(3))
+                sys.stderr.write('regex 2 ok for ' + fn + ' making link\n')
                 bid = bid.replace('_', '-')
                 date_str = str(date_as_int())
                 run = '_'.join((date_str, machine, '0000', 'AXXXXXXXXX'))
