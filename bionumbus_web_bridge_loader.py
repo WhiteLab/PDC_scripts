@@ -14,7 +14,7 @@ def date_time():
     return cur
 
 
-def get_source_list(user, server, directory, log, machine):
+def get_source_list(user, server, directory, log):
     rsync_cmd = 'rsync --list-only -r ' + user + '@' + server + ':' + directory
     try:
         # switching to hash model - will have input file name, output file name in case input isn't formatted properly
@@ -62,9 +62,9 @@ def synergize(config_file):
     config_data['source-dir'], config_data['destination-dir'], config_data['log-dir'], config_data['machine'])
     log = open(log_dir + config_file[:-5], 'a')
     log.write(date_time() + 'Getting source file list\n')
-    source_dict = get_source_list(source_user, source_server, source_dir, log, machine)
+    source_dict = get_source_list(source_user, source_server, source_dir, log)
     if len(source_dict) < 1:
-        log.write('Sequencing files found...eject!\n')
+        log.write(date_time() + 'No sequencing files found...eject!\n')
         log.flush()
         return 0
     else:
