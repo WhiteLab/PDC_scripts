@@ -79,9 +79,13 @@ def synergize(config_file):
         log.write('Searching destination for found sequencing files\n')
         new_dir_list = search_and_desync(source_dict, dest_dir, log, source_user, source_server, source_module,
                                          rsync_pw)
-    for dirs in new_dir_list:
-        final_file_cmd = 'touch ' + dirs + '/import.me ' + dirs + '/sync.me'
-        subprocess.call(final_file_cmd)
+        for dirs in new_dir_list:
+            try:
+                final_file_cmd = 'touch ' + dirs + '/import.me ' + dirs + '/sync.me'
+                subprocess.call(final_file_cmd, shell=True)
+            except:
+                log.write(date_time() + 'Attempt create sync and import files failed for direcctory ' + dirs)
+                log.flush()
     log.write(date_time() + 'File transfer completed!\n')
     log.close()
     return 0
