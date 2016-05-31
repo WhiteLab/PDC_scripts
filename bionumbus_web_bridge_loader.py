@@ -14,9 +14,11 @@ def date_time():
     return cur
 
 
-def get_source_list(user, server, rsync_module, log, rsync_pw):
-    # using module instead of my key
-    rsync_cmd = 'rsync --list-only -r --password-file=' + rsync_pw + ' ' + user + '@' + server + '::' + rsync_module
+def get_source_list(user, server, name, log, rsync_pw, sync_type):
+    # cmd based on module or password with directory
+    rsync_cmd = 'rsync --list-only -r --password-file=' + rsync_pw + ' ' + user + '@' + server + '::' + name
+    if sync_type != 'module':
+        rsync_cmd = 'rsync --list-only -r --password-file=' + rsync_pw + ' ' + user + '@' + server + '/' + name
     try:
         # switching to hash model - will have input file name, output file name in case input isn't formatted properly
         seqfiles = {}
@@ -29,13 +31,13 @@ def get_source_list(user, server, rsync_module, log, rsync_pw):
         return seqfiles
 
     except:
-        log.write('Getting source file list failed for ' + ' '.join((user, server, rsync_module)) + ' using command '
+        log.write('Getting source file list failed for ' + ' '.join((user, server, name)) + ' using command '
                   + rsync_cmd + '\n')
         log.flush()
         exit(1)
 
 
-def search_and_desync(seqdict, dest, log, user, server, module, rsync_pw):
+def search_and_desync(seqdict, dest, log, user, server, name, rsync_pw, sync_type):
     new_dir_list = []
     for sf in seqdict:
         cur = dest + sf
@@ -50,7 +52,10 @@ def search_and_desync(seqdict, dest, log, user, server, module, rsync_pw):
                 new_dir_list.append(check_dir)
                 log.write('Made dir ' + check_dir + '\n')
             rsync_cmd = 'rsync -rtvL  --password-file=' + rsync_pw + ' ' + user + '@' \
-                        + server + '::' + module + '/' + sf + ' ' + dest + seqdict[sf]
+                        + server + '::' + name + '/' + sf + ' ' + dest + seqdict[sf]
+            if sync_type != 'module':
+                rsync_cmd = 'rsync -rtvL  --password-file=' + rsync_pw + ' ' + user + '@' \
+                        + server + '/' + name + '/' + sf + ' ' + dest + seqdict[sf]
             check = subprocess.call(rsync_cmd, shell=True)
             if check != 0:
                 log.write(date_time() + 'File transfer failed using command: ' + rsync_cmd + ' FIX IT\n')
@@ -63,13 +68,13 @@ def search_and_desync(seqdict, dest, log, user, server, module, rsync_pw):
 
 def synergize(config_file):
     config_data = json.loads(open(config_file, 'r').read())
-    (source_user, source_server, source_module, dest_dir, log_dir, rsync_pw) = (config_data['source-user'],
-    config_data['source-ip'], config_data['source-module'], config_data['destination-dir'],
-    config_data['log-dir'], config_data['rsync_pw'])
+    (source_user, source_server, source_name, dest_dir, log_dir, rsync_pw, sync_type) = (config_data['source-user'],
+    config_data['source-ip'], config_data['source'], config_data['destination-dir'],
+    config_data['log-dir'], config_data['rsync_pw'], config_data['type'])
 
     log = open(log_dir + config_file[:-5] + '.log', 'a')
     log.write(date_time() + 'Getting source file list\n')
-    source_dict = get_source_list(source_user, source_server, source_module, log, rsync_pw)
+    source_dict = get_source_list(source_user, source_server, source_name, log, rsync_pw, sync_type)
     if len(source_dict) < 1:
         log.write(date_time() + 'No sequencing files found...eject!\n')
         log.flush()
@@ -77,8 +82,8 @@ def synergize(config_file):
     else:
 
         log.write('Searching destination for found sequencing files\n')
-        new_dir_list = search_and_desync(source_dict, dest_dir, log, source_user, source_server, source_module,
-                                         rsync_pw)
+        new_dir_list = search_and_desync(source_dict, dest_dir, log, source_user, source_server, source_name,
+                                         rsync_pw, sync_type)
         for dirs in new_dir_list:
             try:
                 final_file_cmd = 'touch ' + dirs + '/import.me ' + dirs + '/sync.me'
