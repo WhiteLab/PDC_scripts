@@ -22,7 +22,7 @@ def fudge_it_pf(dirname, machine):
     flist = flist.rstrip('\n')
     year = get_year()
     for fn in flist.split('\n'):
-        test = re.search('\w+-(\d+)-(\d{6}_\w+_\d+_\w{10})_S\d+_L00(\d)_R(\d)_\d+\.fastq\.gz$', fn)
+        test = re.search('\w+-\w+-(\d+)-(\d{6}_\w+_\d+_\w{10})_S\d+_L00(\d)_R(\d)_\d+\.fastq\.gz$', fn)
         try:
             (bid, run, lane, end) = (test.group(1), test.group(2), test.group(3), test.group(4))
             sys.stderr.write('regex 1 ok for ' + fn + ' making link\n')
@@ -39,7 +39,7 @@ def fudge_it_pf(dirname, machine):
         except:
             # 2016-1019_ATCACGA_L002_R2_001.fastq.gz
             sys.stderr.write('First format failed.  Trying second format\n')
-            test = re.search('\w+-\w+-(\d+-\d+)-(\d{6}_\w+_\d+_\w{10})_S\d+_L00(\d)_R(\d)_\d+\.fastq\.gz$', fn)
+            test = re.search('\w+-(\d+-\d+)-(\d{6}_\w+_\d+_\w{10})_S\d+_L00(\d)_R(\d)_\d+\.fastq\.gz$', fn)
             try:
                 (bid, run, lane, end) = (test.group(1), test.group(2), test.group(3), test.group(4))
                 sys.stderr.write('regex 1 ok for ' + fn + ' making link\n')
