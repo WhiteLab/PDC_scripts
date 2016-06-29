@@ -71,8 +71,8 @@ def synergize(config_file):
     (source_user, source_server, source_name, dest_dir, log_dir, rsync_pw, sync_type) = (config_data['source-user'],
     config_data['source-ip'], config_data['source'], config_data['destination-dir'],
     config_data['log-dir'], config_data['rsync_pw'], config_data['type'])
-
-    log = open(log_dir + config_file[:-5] + '.log', 'a')
+    config_fn = os.path.basename(config_file)
+    log = open(log_dir + config_fn[:-5] + '.log', 'a')
     log.write(date_time() + 'Getting source file list\n')
     source_dict = get_source_list(source_user, source_server, source_name, log, rsync_pw, sync_type)
     if len(source_dict) < 1:
