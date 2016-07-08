@@ -14,7 +14,7 @@ def date_time():
     return cur
 
 
-def get_source_list(user, server, name, log, rsync_pw, sync_type):
+def get_source_list(user, server, name, rsync_pw, sync_type):
     # cmd based on module or password with directory
     rsync_cmd = 'rsync --list-only -r --password-file=' + rsync_pw + ' ' + user + '@' + server + '::' + name
     if sync_type != 'module':
@@ -31,26 +31,24 @@ def get_source_list(user, server, name, log, rsync_pw, sync_type):
         return seqfiles
 
     except:
-        log.write('Getting source file list failed for ' + ' '.join((user, server, name)) + ' using command '
+        sys.stderr.write('Getting source file list failed for ' + ' '.join((user, server, name)) + ' using command '
                   + rsync_cmd + '\n')
-        log.flush()
         exit(1)
 
 
-def search_and_desync(seqdict, dest, log, user, server, name, rsync_pw, sync_type):
+def search_and_desync(seqdict, dest, user, server, name, rsync_pw, sync_type):
     new_dir_list = []
     for sf in seqdict:
         cur = dest + sf
         if not os.path.isfile(cur):
-            log.write(date_time() + 'Syncing file ' + sf + '\n')
-            log.flush()
+            sys.stderr.write(date_time() + 'Syncing file ' + sf + '\n')
             # check to see if directory exists first!
             check_dir = dest + os.path.dirname(seqdict[sf])
             if not os.path.isdir(check_dir):
                 mk_run_dir = 'mkdir ' + check_dir
                 subprocess.call(mk_run_dir, shell=True)
                 new_dir_list.append(check_dir)
-                log.write('Made dir ' + check_dir + '\n')
+                sys.stderr.write('Made dir ' + check_dir + '\n')
             rsync_cmd = 'rsync -rtvL  --password-file=' + rsync_pw + ' ' + user + '@' \
                         + server + '::' + name + '/' + sf + ' ' + dest + seqdict[sf]
             if sync_type != 'module':
@@ -58,8 +56,7 @@ def search_and_desync(seqdict, dest, log, user, server, name, rsync_pw, sync_typ
                         + server + '/' + name + '/' + sf + ' ' + dest + seqdict[sf]
             check = subprocess.call(rsync_cmd, shell=True)
             if check != 0:
-                log.write(date_time() + 'File transfer failed using command: ' + rsync_cmd + ' FIX IT\n')
-                log.flush()
+                sys.stderr.write(date_time() + 'File transfer failed using command: ' + rsync_cmd + ' FIX IT\n')
                 exit(1)
             # move file to COPIED folder so that it's not moved again
 
@@ -68,31 +65,26 @@ def search_and_desync(seqdict, dest, log, user, server, name, rsync_pw, sync_typ
 
 def synergize(config_file):
     config_data = json.loads(open(config_file, 'r').read())
-    (source_user, source_server, source_name, dest_dir, log_dir, rsync_pw, sync_type) = (config_data['source-user'],
-    config_data['source-ip'], config_data['source'], config_data['destination-dir'],
-    config_data['log-dir'], config_data['rsync_pw'], config_data['type'])
-    config_fn = os.path.basename(config_file)
-    log = open(log_dir + config_fn[:-5] + '.log', 'a')
-    log.write(date_time() + 'Getting source file list\n')
-    source_dict = get_source_list(source_user, source_server, source_name, log, rsync_pw, sync_type)
+    (source_user, source_server, source_name, dest_dir, rsync_pw, sync_type) = (config_data['source-user'],
+    config_data['source-ip'], config_data['source'], config_data['destination-dir'], config_data['rsync_pw'],
+                                                                                config_data['type'])
+    sys.stderr.write(date_time() + 'Getting source file list\n')
+    source_dict = get_source_list(source_user, source_server, source_name, rsync_pw, sync_type)
     if len(source_dict) < 1:
-        log.write(date_time() + 'No sequencing files found...eject!\n')
-        log.flush()
+        sys.stderr.write(date_time() + 'No sequencing files found...eject!\n')
         return 0
     else:
 
-        log.write('Searching destination for found sequencing files\n')
-        new_dir_list = search_and_desync(source_dict, dest_dir, log, source_user, source_server, source_name,
+        sys.stderr.write('Searching destination for found sequencing files\n')
+        new_dir_list = search_and_desync(source_dict, dest_dir, source_user, source_server, source_name,
                                          rsync_pw, sync_type)
         for dirs in new_dir_list:
             try:
                 final_file_cmd = 'touch ' + dirs + '/import.me ' + dirs + '/sync.me'
                 subprocess.call(final_file_cmd, shell=True)
             except:
-                log.write(date_time() + 'Attempt create sync and import files failed for direcctory ' + dirs)
-                log.flush()
-    log.write(date_time() + 'File transfer completed!\n')
-    log.close()
+                sys.stderr.write(date_time() + 'Attempt create sync and import files failed for direcctory ' + dirs)
+    sys.stderr.write(date_time() + 'File transfer completed!\n')
     return 0
 
 
