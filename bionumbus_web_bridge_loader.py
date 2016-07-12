@@ -83,7 +83,7 @@ def synergize(config_file):
                 final_file_cmd = 'touch ' + dirs + '/import.me ' + dirs + '/sync.me'
                 subprocess.call(final_file_cmd, shell=True)
             except:
-                sys.stderr.write(date_time() + 'Attempt create sync and import files failed for direcctory ' + dirs)
+                sys.stderr.write(date_time() + 'Attempt create sync and import files failed for directory ' + dirs)
     sys.stderr.write(date_time() + 'File transfer completed!\n')
     return 0
 
