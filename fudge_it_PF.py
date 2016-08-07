@@ -47,7 +47,7 @@ def fudge_it_pf(dirname, machine, links):
                              '\.gz$', fn)
             try:
                 (bid, run, lane, end) = (test.group(1), test.group(2), test.group(3), test.group(4))
-                run.replace('-', '_')
+                run = run.replace('-', '_')
                 sys.stderr.write('trying regex 2 ok for ' + fn + ' making link\n')
                 run_path = links + '/' + run
                 if not os.path.isdir(run_path):
