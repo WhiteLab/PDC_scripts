@@ -22,36 +22,37 @@ def fudge_it_pf(dirname, machine, links):
     flist = flist.rstrip('\n')
     year = get_year()
     for fn in flist.split('\n'):
-        test = re.search('\w+-\w+[-|_](\d+)-(\d{6}_\w+_\d+_\w{10})_S\d+_L00(\d)_R(\d)_\d+\.fastq\.gz$', fn)
+        test = re.search('\w+[-|_](\d+-\d+)[_|-](\d{6}[_|-]\w+[_|-]\d+[_|-]\w{10})_S\d+_L00(\d)_R(\d)_\d+\.fastq'
+                         '\.gz$', fn)
         try:
+            # 2016-1019_ATCACGA_L002_R2_001.fastq.gz
             (bid, run, lane, end) = (test.group(1), test.group(2), test.group(3), test.group(4))
-            sys.stderr.write('regex 1 ok for ' + fn + ' making link\n')
-            bid = year + '-' + bid
+            run = run.replace('-', '_')
+            sys.stderr.write('trying regex 2 ok for ' + fn + ' making link\n')
             run_path = links + '/' + run
             if not os.path.isdir(run_path):
-                try:
-                    os.mkdir(run_path, 0o755)
-                except:
-                    sys.stderr.write('Could not create directory ' + run_path)
-                    exit(1)
+                os.mkdir(run_path, 0o755)
             symlink = run_path + '/' + '_'.join((bid, run, lane, end)) + '_sequence.txt.gz'
             if not os.path.isfile(symlink):
                 mklink = 'ln -s ' + fn + ' ' + symlink
                 subprocess.call(mklink, shell=True)
                 sys.stderr.write(mklink + '\n')
 
+
         except:
-            # 2016-1019_ATCACGA_L002_R2_001.fastq.gz
             sys.stderr.write('First format failed.  Trying second format\n')
-            test = re.search('\w+[-|_](\d+-\d+)[_|-](\d{6}[_|-]\w+[_|-]\d+[_|-]\w{10})_S\d+_L00(\d)_R(\d)_\d+\.fastq'
-                             '\.gz$', fn)
+            test = re.search('\w+-\w+[-|_](\d+)-(\d{6}_\w+_\d+_\w{10})_S\d+_L00(\d)_R(\d)_\d+\.fastq\.gz$', fn)
             try:
                 (bid, run, lane, end) = (test.group(1), test.group(2), test.group(3), test.group(4))
-                run = run.replace('-', '_')
-                sys.stderr.write('trying regex 2 ok for ' + fn + ' making link\n')
+                sys.stderr.write('regex 1 ok for ' + fn + ' making link\n')
+                bid = year + '-' + bid
                 run_path = links + '/' + run
                 if not os.path.isdir(run_path):
-                    os.mkdir(run_path, 0o755)
+                    try:
+                        os.mkdir(run_path, 0o755)
+                    except:
+                        sys.stderr.write('Could not create directory ' + run_path)
+                        exit(1)
                 symlink = run_path + '/' + '_'.join((bid, run, lane, end)) + '_sequence.txt.gz'
                 if not os.path.isfile(symlink):
                     mklink = 'ln -s ' + fn + ' ' + symlink
