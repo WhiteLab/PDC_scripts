@@ -28,7 +28,7 @@ def fudge_it_pf(dirname, machine, links):
             # 2016-1019_ATCACGA_L002_R2_001.fastq.gz
             (bid, run, lane, end) = (test.group(1), test.group(2), test.group(3), test.group(4))
             run = run.replace('-', '_')
-            sys.stderr.write('trying regex 2 ok for ' + fn + ' making link\n')
+            sys.stderr.write('trying regex 1 ok for ' + fn + ' making link\n')
             run_path = links + '/' + run
             if not os.path.isdir(run_path):
                 os.mkdir(run_path, 0o755)
@@ -41,10 +41,11 @@ def fudge_it_pf(dirname, machine, links):
 
         except:
             sys.stderr.write('First format failed.  Trying second format\n')
-            test = re.search('^\w+-\w+[-|_](\d+)-(\d{6}_\w+_\d+_\w{10})_S\d+_L00(\d)_R(\d)_\d+\.fastq\.gz$', fn)
+            test = re.search('\w+-\w+[-|_](\d+)[_|-](\d{6}[_|-]\w+[_|-]\d+[_|-]\w{10})_S\d+_L00(\d)_R(\d)_\d+\.fastq\.gz$', fn)
             try:
                 (bid, run, lane, end) = (test.group(1), test.group(2), test.group(3), test.group(4))
-                sys.stderr.write('regex 1 ok for ' + fn + ' making link\n')
+                run = run.replace('-', '_')
+                sys.stderr.write('regex 2 ok for ' + fn + ' making link\n')
                 bid = year + '-' + bid
                 run_path = links + '/' + run
                 if not os.path.isdir(run_path):
