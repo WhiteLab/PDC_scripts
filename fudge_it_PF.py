@@ -41,7 +41,7 @@ def fudge_it_pf(dirname, machine, links):
 
         except:
             sys.stderr.write('First format failed.  Trying second format\n')
-            test = re.search('\w+-\w+[-|_](\d+)[_|-](\d{6}[_|-]\w+[_|-]\d+[_|-]\w{10})_S\d+_L00(\d)_R(\d)_\d+\.fastq\.gz$', fn)
+            # test = re.search('^\w+-\w+[-|_](\d+)[_|-](\d{6}[_|-]\w+[_|-]\d+[_|-]\w{10})_S\d+_L00(\d)_R(\d)_\d+\.fastq\.gz$', fn)
             try:
                 (bid, run, lane, end) = (test.group(1), test.group(2), test.group(3), test.group(4))
                 run = run.replace('-', '_')
