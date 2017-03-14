@@ -34,24 +34,25 @@ def fudge_it(dirname, machine):
 
         except:
             # 2016-1019_ATCACGA_L002_R2_001.fastq.gz
-            sys.stderr.write('First format failed.  Trying second format\n')
-            test = re.search('(\d+[-_]\d+)_\w+_L00(\d)_R(\d)_\d+\.fastq\.gz$', fn)
-            try:
-                (bid, lane, end) = (test.group(1), test.group(2), test.group(3))
-                sys.stderr.write('regex 2 ok for ' + fn + ' checking for existing link\n')
-                bid = bid.replace('_', '-')
-                date_str = str(date_as_int())
-                run = '_'.join((date_str, machine, '0000', 'AXXXXXXXXX'))
-                run_path = dirname + '/' + run
-                if not os.path.isdir(run_path):
-                    os.mkdir(run_path, 0o755)
-                symlink = run_path + '/' + '_'.join((bid, run, lane, end)) + '_sequence.txt.gz'
-                if not os.path.isfile(symlink):
-                    mklink = 'ln -s ' + fn + ' ' + symlink
-                    subprocess.call(mklink, shell=True)
-                    sys.stderr.write('Creating link for ' + fn + ' ' + mklink + '\n')
-            except:
-                sys.stderr.write('Could not reformat ' + fn + '\n')
+            sys.stderr.write('Could not reformat ' + fn + '\n')
+            # sys.stderr.write('First format failed.  Trying second format\n')
+            # test = re.search('(\d+[-_]\d+)_\w+_L00(\d)_R(\d)_\d+\.fastq\.gz$', fn)
+            # try:
+            #     (bid, lane, end) = (test.group(1), test.group(2), test.group(3))
+            #     sys.stderr.write('regex 2 ok for ' + fn + ' checking for existing link\n')
+            #     bid = bid.replace('_', '-')
+            #     date_str = str(date_as_int())
+            #     run = '_'.join((date_str, machine, '0000', 'AXXXXXXXXX'))
+            #     run_path = dirname + '/' + run
+            #     if not os.path.isdir(run_path):
+            #         os.mkdir(run_path, 0o755)
+            #     symlink = run_path + '/' + '_'.join((bid, run, lane, end)) + '_sequence.txt.gz'
+            #     if not os.path.isfile(symlink):
+            #         mklink = 'ln -s ' + fn + ' ' + symlink
+            #         subprocess.call(mklink, shell=True)
+            #         sys.stderr.write('Creating link for ' + fn + ' ' + mklink + '\n')
+            # except:
+            #     sys.stderr.write('Could not reformat ' + fn + '\n')
 
 
 def main():
