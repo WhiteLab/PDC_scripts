@@ -14,7 +14,8 @@ def date_as_int():
 def get_year():
     return str(time.strftime("%Y"))
 
-def fudge_it_pf(dirname, machine, links):
+
+def fudge_it_pf(dirname, links):
     # helper function to create symbolic link with correctly named file
     # see if it matches this format: 2016-337_GTGAAAC_160512_D00422_0315_AHMLHHBCXX_L002_R1_001.fastq.gz
     find_cmd = 'find ' + dirname + ' -name \'*.fastq.gz\''
@@ -28,7 +29,7 @@ def fudge_it_pf(dirname, machine, links):
             # 2016-1019_ATCACGA_L002_R2_001.fastq.gz
             (bid, run, lane, end) = (test.group(1), test.group(2), test.group(3), test.group(4))
             run = run.replace('-', '_')
-            sys.stderr.write('trying regex 1 ok for ' + fn + ' making link\n')
+            sys.stderr.write('trying regex 1 ok for ' + fn + ' checking for existing link\n')
             run_path = links + '/' + run
             if not os.path.isdir(run_path):
                 os.mkdir(run_path, 0o755)
@@ -36,7 +37,7 @@ def fudge_it_pf(dirname, machine, links):
             if not os.path.isfile(symlink):
                 mklink = 'ln -s ' + fn + ' ' + symlink
                 subprocess.call(mklink, shell=True)
-                sys.stderr.write(mklink + '\n')
+                sys.stderr.write('Creating link for ' + fn + ' ' + mklink + '\n')
 
         except:
             sys.stderr.write('Could not reformat ' + fn + '\n')
@@ -48,12 +49,11 @@ def main():
                     ' formatted')
     parser.add_argument('-d', '--dir', action='store', dest='dirname', help='directory to search')
     parser.add_argument('-l', '--links', action='store', dest='links', help='directory to create symlinks in')
-    parser.add_argument('-m', '--machine', action='store', dest='machine', help='machine name to use to fudge')
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
     args = parser.parse_args()
-    fudge_it_pf(args.dirname, args.machine, args.links)
+    fudge_it_pf(args.dirname, args.links)
 
 if __name__ == '__main__':
     main()
