@@ -18,15 +18,15 @@ def fudge_it(dirname, machine):
     flist = subprocess.check_output(find_cmd, shell=True)
     flist = flist.rstrip('\n')
     for fn in flist.split('\n'):
-        test = re.search('(\d{4}[-_]\d+)_\D+_merged_(\d{6}_\w+_\d+_\w{10})_L00(\d)_R(\d)_\d+\.fastq\.gz$', fn)
+        test = re.search('(\d{4}[-_]\d+)_\D+_merged_(\d{6}_\w+_\d+_\w{10})_R(\d)_\d+\.fastq\.gz$', fn)
         try:
-            (bid, run, lane, end) = (test.group(1), test.group(2), test.group(3), test.group(4))
+            (bid, run, end) = (test.group(1), test.group(2), test.group(3))
             sys.stderr.write('regex 1 ok for ' + fn + ' checking for existing link\n')
             bid = bid.replace('_', '-')
             run_path = dirname + '/' + run
             if not os.path.isdir(run_path):
                 os.mkdir(run_path, 0o755)
-            symlink = run_path + '/' + '_'.join((bid, run, lane, end)) + '_sequence.txt.gz'
+            symlink = run_path + '/' + '_'.join((bid, run, '1', end)) + '_sequence.txt.gz'
             if not os.path.isfile(symlink):
                 mklink = 'ln -s ' + fn + ' ' + symlink
                 subprocess.call(mklink, shell=True)
