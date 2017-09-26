@@ -19,7 +19,11 @@ def fudge_it_pf(dirname, links):
     # helper function to create symbolic link with correctly named file
     # see if it matches this format: 2016-337_GTGAAAC_160512_D00422_0315_AHMLHHBCXX_L002_R1_001.fastq.gz
     find_cmd = 'find ' + dirname + ' -name \'*.fastq.gz\''
-    flist = subprocess.check_output(find_cmd, shell=True)
+    flist = []
+    try:
+        flist = subprocess.check_output(find_cmd, shell=True)
+    except:
+        sys.stderr.write('There was an error executing the find command.  Ignoring\n')
     flist = flist.rstrip('\n')
     year = get_year()
     for fn in flist.split('\n'):
