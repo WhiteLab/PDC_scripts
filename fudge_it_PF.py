@@ -44,20 +44,23 @@ def fudge_it_pf(dirname, links):
                 sys.stderr.write('Creating link for ' + fn + ' ' + mklink + '\n')
 
         except:
-            sys.stderr.write('Normal format failed.  Trying NextSeq format ' + fn + '\n')
-            test = re.search('\w+[-|_](\d+-\d+)[_|-](\d{6}[_|-]\w+[_|-]\d+[_|-]\w{10})_S\d+_R(\d)_\d+\.fastq'
-                             '\.gz$', fn)
-            (bid, run, end) = (test.group(1), test.group(2), test.group(3))
-            run = run.replace('-', '_')
-            sys.stderr.write('trying regex 1 ok for ' + fn + ' checking for existing link\n')
-            run_path = links + '/' + run
-            if not os.path.isdir(run_path):
-                os.mkdir(run_path, 0o755)
-            symlink = run_path + '/' + '_'.join((bid, run, 'L001', end)) + '_sequence.txt.gz'
-            if not os.path.isfile(symlink):
-                mklink = 'ln -s ' + fn + ' ' + symlink
-                subprocess.call(mklink, shell=True)
-                sys.stderr.write('Creating link for ' + fn + ' ' + mklink + '\n')
+            try:
+                sys.stderr.write('Normal format failed.  Trying NextSeq format ' + fn + '\n')
+                test = re.search('\w+[-|_](\d+-\d+)[_|-](\d{6}[_|-]\w+[_|-]\d+[_|-]\w{10})_S\d+_R(\d)_\d+\.fastq'
+                                 '\.gz$', fn)
+                (bid, run, end) = (test.group(1), test.group(2), test.group(3))
+                run = run.replace('-', '_')
+                sys.stderr.write('trying regex 2 ok for ' + fn + ' checking for existing link\n')
+                run_path = links + '/' + run
+                if not os.path.isdir(run_path):
+                    os.mkdir(run_path, 0o755)
+                symlink = run_path + '/' + '_'.join((bid, run, 'L001', end)) + '_sequence.txt.gz'
+                if not os.path.isfile(symlink):
+                    mklink = 'ln -s ' + fn + ' ' + symlink
+                    subprocess.call(mklink, shell=True)
+                    sys.stderr.write('Creating link for ' + fn + ' ' + mklink + '\n')
+            except:
+                sys.stderr.write('Regex 2 failed for ' + fn + ' Moving on\n')
 
 
 def main():
