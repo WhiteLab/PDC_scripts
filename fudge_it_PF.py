@@ -54,7 +54,7 @@ def fudge_it_pf(dirname, links):
                 run_path = links + '/' + run
                 if not os.path.isdir(run_path):
                     os.mkdir(run_path, 0o755)
-                symlink = run_path + '/' + '_'.join((bid, run, 'L001', end)) + '_sequence.txt.gz'
+                symlink = run_path + '/' + '_'.join((bid, run, '1', end)) + '_sequence.txt.gz'
                 if not os.path.isfile(symlink):
                     mklink = 'ln -s ' + fn + ' ' + symlink
                     subprocess.call(mklink, shell=True)
