@@ -25,21 +25,21 @@ class Loader:
         self.remote_user = self.config_data['remote-user']
         self.remote_server = self.config_data['remote-ip']
         self.remote_dir = self.config_data['remote-dir']
-        self.project_dir = self.config_data['project']
+        self.project_dir = self.config_data['project-dir']
         self.sub_dir = self.config_data['subdirectory']
         self.password_file = self.config_data['password-file']
         self.local_files = list()
         self.remote_files = list()
         # relocate our operations to the cinder volume
-        os.chdir(self.config_data['local-dir'])
+        os.chdir(self.config_data['log-dir'])
 
         logfile = self.config_data['project'] + ".log"
         logging.basicConfig(filename=logfile, level=logging.DEBUG,
                             format='%(asctime)s %(levelname)s: %(message)s',
                             datefmt='[%Y-%m-%d %H:%M:%S %p]')
         pdb.set_trace()
-        self.get_remote_filelist()
         self.get_local_filelist()
+        self.get_remote_filelist()
 
         if len(self.remote_files) < 1:
             logging.info("No new files to transfer, exiting")
