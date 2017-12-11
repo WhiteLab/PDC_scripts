@@ -77,7 +77,6 @@ class Loader:
         for line in p.splitlines():
             # appending only the gzipped names
             remote_filename = os.path.basename(line)
-            pdb.set_trace()
             if remote_filename[-2:] == 'gz':
                 if remote_filename not in self.local_files:
                     logging.info("transfer remote_filename: " + line)
