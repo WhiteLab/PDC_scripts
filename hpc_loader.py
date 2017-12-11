@@ -5,7 +5,6 @@ import logging
 import os
 import subprocess
 import sys
-import pdb
 
 '''
 HPC daemon version of swift loader.
@@ -37,7 +36,6 @@ class Loader:
         logging.basicConfig(filename=logfile, level=logging.DEBUG,
                             format='%(asctime)s %(levelname)s: %(message)s',
                             datefmt='[%Y-%m-%d %H:%M:%S %p]')
-        pdb.set_trace()
         self.get_local_filelist()
         self.get_remote_filelist()
 
@@ -91,17 +89,16 @@ class Loader:
             create_dest = 'mkdir -p ' + file_dir
             logging.info("Creating missing destination directory " + create_dest)
             subprocess.call(create_dest, shell=True)
-        get_cmd = 'rsync -rtVP --password-file ' + self.password_file + ' ' + self.remote_user + '@' \
+        get_cmd = 'rsync -rtvP --password-file ' + self.password_file + ' ' + self.remote_user + '@' \
                   + self.remote_server + '::' + self.remote_dir + '/' + file_basename + ' ' + file_dir + '/' \
                   + file_basename
-        pdb.set_trace()
         logging.info(get_cmd)
-        # subprocess.call(get_cmd, shell=True)
+        subprocess.call(get_cmd, shell=True)
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Rsync project-specific files using modules between local and remote.')
+        description='rsync project-specific files using modules between local and remote.')
     parser.add_argument('-j', '--json', action='store', dest='config_file',
                         help='.json config file, contains file locations and access credential details')
 
