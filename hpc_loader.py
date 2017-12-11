@@ -86,14 +86,14 @@ class Loader:
         logging.info("syncing to local: " + filename)
         file_basename = os.path.basename(filename)
         bnid = file_basename.split('_')[0]
-        file_dir = self.remote_dir + ' ' + self.project_dir + '/' + self.sub_dir + '/' \
-                  + bnid
+        file_dir = self.project_dir + '/' + self.sub_dir + '/' + bnid
         if not os.path.isdir(file_dir):
             create_dest = 'mkdir -p ' + file_dir
-            logging.info("Creating missing destibation directory " + create_dest)
+            logging.info("Creating missing destination directory " + create_dest)
             subprocess.call(create_dest, shell=True)
         get_cmd = 'rsync -rtVP --password-file ' + self.password_file + ' ' + self.remote_user + '@' \
-                  + self.remote_server + '::' + file_dir + '/' + file_basename
+                  + self.remote_server + '::' + self.remote_dir + '/' + file_basename + ' ' + file_dir + '/' \
+                  + file_basename
         pdb.set_trace()
         logging.info(get_cmd)
         # subprocess.call(get_cmd, shell=True)
