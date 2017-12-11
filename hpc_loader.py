@@ -18,7 +18,7 @@ Do this only on newly available files
 
 class Loader:
 
-    def __init__(self, json_config):
+    def __init__(self, json_config, chown):
         self.json_config = json_config
         self.config_data = json.loads(open(self.json_config, 'r').read())
         self.remote_user = self.config_data['remote-user']
@@ -27,6 +27,10 @@ class Loader:
         self.project_dir = self.config_data['project-dir']
         self.sub_dir = self.config_data['subdirectory']
         self.password_file = self.config_data['password-file']
+        self.chown_flag = chown
+        if self.chown_flag == 'y':
+            self.user = self.config_data['f_owner']
+            self.group = self.config_data['f_group']
         self.local_files = list()
         self.remote_files = list()
         # relocate our operations to the cinder volume
@@ -87,11 +91,15 @@ class Loader:
         file_dir = self.project_dir + '/' + self.sub_dir + '/' + bnid
         if not os.path.isdir(file_dir):
             create_dest = 'mkdir -p ' + file_dir
+            if self.chown_flag == 'y':
+                create_dest += '; chown ' + self.user + ':' + self.group + ' ' + file_dir
             logging.info("Creating missing destination directory " + create_dest)
             subprocess.call(create_dest, shell=True)
         get_cmd = 'rsync -rtvP --password-file ' + self.password_file + ' ' + self.remote_user + '@' \
                   + self.remote_server + '::' + self.remote_dir + '/' + file_basename + ' ' + file_dir + '/' \
                   + file_basename
+        if self.chown_flag == 'y':
+            get_cmd += '; chown ' + self.user + ':' + self.group + ' ' + file_dir + file_basename
         logging.info(get_cmd)
         subprocess.call(get_cmd, shell=True)
 
@@ -101,13 +109,15 @@ def main():
         description='rsync project-specific files using modules between local and remote.')
     parser.add_argument('-j', '--json', action='store', dest='config_file',
                         help='.json config file, contains file locations and access credential details')
+    parser.add_argument('-c', '--chown', action='store', dest='chown',
+                        help='Change user:group flag with \'y\'')
 
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
     args = parser.parse_args()
 
-    Loader(args.config_file)
+    Loader(args.config_file, args.chown)
 
 
 if __name__ == '__main__':
