@@ -76,6 +76,7 @@ class Loader:
             # appending only the gzipped names
             remote_filename = os.path.basename(line)
             if remote_filename[-2:] == 'gz':
+                remote_filename = remote_filename.split()[-1]
                 if remote_filename not in self.local_files:
                     logging.info("transfer remote file: " + line)
                     # output has extensive file info, only need last part
