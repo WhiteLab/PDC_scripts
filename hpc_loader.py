@@ -57,10 +57,8 @@ class Loader:
         find_cmd = 'find ' + self.project_dir + '/' + self.sub_dir + ' -name *.gz'
         logging.info(find_cmd)
         p = subprocess.check_output(find_cmd, shell=True)
-        pdb.set_trace()
         for line in p.splitlines():
             self.local_files.append(line.split('/')[-1])
-            pdb.set_trace()
 
     def get_remote_filelist(self):
         logging.info("Gathering new remote files")
@@ -79,7 +77,7 @@ class Loader:
             remote_filename = os.path.basename(line)
             if remote_filename[-2:] == 'gz':
                 if remote_filename not in self.local_files:
-                    logging.info("transfer remote_filename: " + line)
+                    logging.info("transfer remote file: " + line)
                     # output has extensive file info, only need last part
                     self.remote_files.append(line.split()[-1])
 
