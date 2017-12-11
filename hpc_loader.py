@@ -61,7 +61,7 @@ class Loader:
 
     def get_remote_filelist(self):
         logging.info("Gathering new remote files")
-        # module set on remote
+        # module set on remote, in this case remote-dir is actually the module name
         list_cmd = 'rsync --list-only -r --password-file=' + self.password_file + ' ' + self.remote_user + '@' \
                    + self.remote_server + '::' + self.remote_dir
         logging.info(list_cmd)
@@ -69,7 +69,7 @@ class Loader:
         try:
             p = subprocess.check_output(list_cmd, shell=True)
         except:
-            logging.info("Directory for " + self.config_data['remote-dir'] + " not found! Check configs!")
+            logging.info("Directory for " + self.remote_dir + " not found! Check configs!")
             exit(1)
         for line in p.splitlines():
             # appending only the gzipped names
