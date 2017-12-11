@@ -5,6 +5,7 @@ import logging
 import os
 import subprocess
 import sys
+import pdb
 
 '''
 HPC daemon version of swift loader.
@@ -36,7 +37,7 @@ class Loader:
         logging.basicConfig(filename=logfile, level=logging.DEBUG,
                             format='%(asctime)s %(levelname)s: %(message)s',
                             datefmt='[%Y-%m-%d %H:%M:%S %p]')
-
+        pdb.set_trace()
         self.get_remote_filelist()
         self.get_local_filelist()
 
@@ -56,8 +57,10 @@ class Loader:
         find_cmd = 'find ' + self.project_dir + '/' + self.sub_dir + ' -name *.gz'
         logging.info(find_cmd)
         p = subprocess.check_output(find_cmd, shell=True)
+        pdb.set_trace()
         for line in p.splitlines():
             self.local_files.append(line.split('/')[-1])
+            pdb.set_trace()
 
     def get_remote_filelist(self):
         logging.info("Gathering new remote files")
@@ -74,18 +77,23 @@ class Loader:
         for line in p.splitlines():
             # appending only the gzipped names
             remote_filename = os.path.basename(line)
+            pdb.set_trace()
             if remote_filename[-2:] == 'gz':
                 if remote_filename not in self.local_files:
                     logging.info("transfer remote_filename: " + line)
-                    self.remote_files.append(line)
+                    # output has extensive file info, only need last part
+                    self.remote_files.append(line.split()[-1])
 
     def local_load(self, filename):
         logging.info("syncing to local: " + filename)
         file_basename = os.path.basename(filename)
         bnid = file_basename.split('_')[0]
-        os.system('rsync -rtVP --password-file ' + self.password_file + ' ' + self.remote_user + '@'
-                  + self.remote_server + '::' + self.remote_dir + ' ' + self.project_dir + '/' + self.sub_dir + '/'
-                  + bnid + '/' + file_basename)
+        get_cmd = 'rsync -rtVP --password-file ' + self.password_file + ' ' + self.remote_user + '@' \
+                  + self.remote_server + '::' + self.remote_dir + ' ' + self.project_dir + '/' + self.sub_dir + '/' \
+                  + bnid + '/' + file_basename
+        pdb.set_trace()
+        logging.info(get_cmd)
+        # subprocess.call(get_cmd, shell=True)
 
 
 def main():
@@ -98,8 +106,6 @@ def main():
         parser.print_help()
         sys.exit(1)
     args = parser.parse_args()
-
-    subprocess.call('. ' + args.novarc, shell=True)
 
     Loader(args.config_file)
 
