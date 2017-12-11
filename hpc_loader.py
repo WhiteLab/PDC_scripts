@@ -90,10 +90,9 @@ class Loader:
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Copy files from afar, stage in cwd, and load into Swift.')
+        description='Rsync project-specific files using modules between local and remote.')
     parser.add_argument('-j', '--json', action='store', dest='config_file',
                         help='.json config file, contains file locations and access credential details')
-    parser.add_argument('-n', '--nova', action='store', dest='novarc', help='.novarc file with swift openstack auth')
 
     if len(sys.argv) == 1:
         parser.print_help()
