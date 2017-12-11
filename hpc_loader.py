@@ -99,7 +99,7 @@ class Loader:
                   + self.remote_server + '::' + self.remote_dir + '/' + file_basename + ' ' + file_dir + '/' \
                   + file_basename
         if self.chown_flag == 'y':
-            get_cmd += '; chown ' + self.user + ':' + self.group + ' ' + file_dir + file_basename
+            get_cmd += '; chown ' + self.user + ':' + self.group + ' ' + file_dir + '/' + file_basename
         logging.info(get_cmd)
         subprocess.call(get_cmd, shell=True)
 
